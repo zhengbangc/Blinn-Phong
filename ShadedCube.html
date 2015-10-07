@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<button id = "ButtonX">Rotate X</button>
+<button id = "ButtonY">Rotate Y</button>
+<button id = "ButtonZ">Rotate Z</button>
+<button id = "ButtonT">Toggle Rotation</button>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute  vec4 vPosition;
+attribute  vec4 vNormal;
+// varying vec4 fColor;
+varying vec3 N,L,E;
+
+// uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+// uniform float shininess;
+void main()
+{
+//Your Code Goes HERE
+	vec3 pos = -((modelViewMatrix*vPosition).stp);
+	vec3 light = lightPosition.stp;
+	L = normalize(light-pos);
+	E = -pos;
+	N = normalize((modelViewMatrix*vNormal).stp);
+	gl_Position = projectionMatrix*modelViewMatrix*vPosition;
+    
+}    
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+uniform vec4 ambientProduct, diffuseProduct, specularProduct;
+uniform float shininess;
+// varying vec4 fColor;
+varying vec3 N,L,E;
+
+void
+main()
+{
+	vec4 fColor;
+	vec3 H = normalize(L + E);
+	vec4 ambient = ambientProduct;
+	float Kd = max( dot(L,N), 0.0);
+	vec4 diffuse = Kd*diffuseProduct;
+	float Ks = pow( max(dot(N, H), 0.0), shininess);
+	vec4 specular = Ks * specularProduct;
+	if ( dot(L, N) < 0.0)
+		specular = vec4(0.0, 0.0, 0.0, 1.0);
+	fColor = ambient + diffuse + specular;
+	fColor.a = 1.0;
+	gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="webgl-utils.js"></script>
+<script type="text/javascript" src="initShaders.js"></script>
+<script type="text/javascript" src="MV.js"></script>
+<script type="text/javascript" src="shadedCube.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
